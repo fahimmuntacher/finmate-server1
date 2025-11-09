@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 require("dotenv").config()
 var cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 const port = process.env.PORT || 3000;
 
@@ -43,13 +43,23 @@ async function run() {
     
     app.get("/transactions", async (req, res) => {
       const email = req.query.email;
-      console.log("Email query:", email);
 
       const query = email ? { userEmail: email } : {};
       const cursor = transactionsColl.find(query);
       const result = await cursor.toArray();
       res.send(result);
     });
+
+    // get details
+
+    app.get("/transactions/:id", async(req, res) => {
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const cursor = await transactionsColl.findOne(query);
+      
+      res.send(cursor)
+    })
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
