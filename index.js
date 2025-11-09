@@ -38,12 +38,18 @@ async function run() {
         res.send(result);
     })
 
-    // get transaction data
+
+    // get transaction by email
+    
     app.get("/transactions", async (req, res) => {
-        const cursor = transactionsColl.find();
-        const result = await cursor.toArray();
-        res.send(result)
-    })
+      const email = req.query.email;
+      console.log("Email query:", email);
+
+      const query = email ? { userEmail: email } : {};
+      const cursor = transactionsColl.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
