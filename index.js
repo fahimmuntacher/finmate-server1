@@ -64,7 +64,12 @@ async function run() {
     app.get("/transactions", verifyUserToken, async (req, res) => {
       const { email, type, sortByDate } = req.query;
       const query = {};
-      if (email) query.userEmail = email;
+      if (email) {
+        query.userEmail = email;
+        if(email !== req.token_email){
+          return res.status(403).send({message: 'forbidden'})
+        }
+      }
       if (type) query.type = type;
 
       let cursor = transactionsColl.find(query);
