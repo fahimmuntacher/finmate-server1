@@ -61,7 +61,7 @@ async function run() {
 
     // get transaction by email
 
-    app.get("/transactions", async (req, res) => {
+    app.get("/transactions", verifyUserToken, async (req, res) => {
       const { email, type, sortByDate } = req.query;
       const query = {};
       if (email) query.userEmail = email;
