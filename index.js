@@ -1,15 +1,37 @@
 const express = require("express");
 const app = express();
 require("dotenv").config();
-var cors = require("cors");
+const cors = require("cors");
+const admin = require("firebase-admin");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const port = process.env.PORT || 3000;
+
+const serviceAccount = require("./firebase-admin-key.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
 
 // MiddleWear
 app.use(cors());
 app.use(express.json());
 
+const verifyUserToken = async (req, res, next) => {
+  const authorization =  req.headers.authorization;
+  if(!authorization){
+    return res.status(401).send({message: "unauthorized access"})
+  }
+  const token = authorization.split(' ')[1];
+  try{
+    const decoded = await admin.auth().verifyIdToken(token)
+    req.token_email = decoded.email;
+    next()
+  }catch{
+      return res.status(401).send({message : 'unauthorized access'})
+  }
+
+}
 // transactions
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.8xsgmgv.mongodb.net/?appName=Cluster0`;
