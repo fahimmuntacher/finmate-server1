@@ -47,12 +47,12 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     const db = client.db("finmate");
     const transactionsColl = db.collection("transactions");
 
     // add transaction
-    app.post("/transactions", async (req, res) => {
+    app.post("/transactions",verifyUserToken, async (req, res) => {
       console.log("headers in the post ", req.headers);
       const newTransaction = req.body;
       const result = await transactionsColl.insertOne(newTransaction);
@@ -61,7 +61,7 @@ async function run() {
 
     // get transaction by email
 
-    app.get("/transactions", verifyUserToken, async (req, res) => {
+    app.get("/transactions",verifyUserToken, async (req, res) => {
       const { email, type, sortByDate } = req.query;
       const query = {};
       if (email) {
@@ -82,7 +82,7 @@ async function run() {
 
     // get details
 
-    app.get("/transactions/:id", async (req, res) => {
+    app.get("/transactions/:id", verifyUserToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const cursor = await transactionsColl.findOne(query);
@@ -92,7 +92,7 @@ async function run() {
 
     // update transaction 
 
-    app.put("/transactions/:id", async(req, res) => {
+    app.put("/transactions/:id", verifyUserToken, async(req, res) => {
       const id = req.params.id;
       const updatedTrans = req.body
       const query = {_id : new ObjectId(id)};
@@ -105,7 +105,7 @@ async function run() {
     })
 
     // delete transaction
-    app.delete("/transactions/:id", async(req, res) => {
+    app.delete("/transactions/:id", verifyUserToken, async(req, res) => {
       const id = req.params.id;
       const query = {_id : new ObjectId(id)};
       const cursor = await transactionsColl.deleteOne(query);
